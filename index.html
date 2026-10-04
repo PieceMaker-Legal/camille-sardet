@@ -5,17 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f8f7f3">
   <meta name="description" content="Portfolio de Camille Sardet, designer et plasticienne à Paris.">
-  <title>Camille Sardet — Designer & plasticienne</title>
-  <link rel="stylesheet" href="styles.css?v=20">
+  <title>Camille Sardet — Studio de design</title>
+  <link rel="stylesheet" href="styles.css?v=23">
+  <link rel="stylesheet" href="intro.css?v=4">
+  <script src="data/intro-glyphs.js?v=1" defer></script>
+  <script src="intro.js?v=8" defer></script>
   <script src="data/content.js?v=19" defer></script>
-  <script src="app.js?v=21" defer></script>
+  <script src="app.js?v=23" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <section class="entrance" aria-label="Camille Sardet, designer et plasticienne">
+    <div class="entrance-stage">
+      <div class="entrance-cover">
+        <img src="assets/images/collecte-689.webp" width="1600" height="1067" alt="Collectes, vue 4" loading="eager" fetchpriority="high" decoding="async">
+      </div>
+      <p class="entrance-name" aria-hidden="true">Camille Sardet</p>
+      <svg class="entrance-drawing" aria-hidden="true" focusable="false"></svg>
+      <a class="entrance-scroll" href="#accueil"><span>Défiler</span><span class="entrance-arrow" aria-hidden="true">↓</span></a>
+    </div>
+  </section>
   <header class="site-header">
     <a class="wordmark" href="#projets" aria-label="Camille Sardet, accueil">
-      <h1 class="wordmark-name" id="accueil">CAMILLE<br>SARDET<span class="identity-dot" aria-hidden="true"></span></h1>
-      <span class="wordmark-title">Designer &amp; plasticienne</span>
+      <h1 class="wordmark-name" id="accueil">CAMILLE<br>SARDET</h1>
+      <span class="wordmark-title">Studio de design</span>
     </a>
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
       <span class="menu-toggle-label">Menu</span><span class="menu-toggle-icon" aria-hidden="true"></span>
@@ -49,10 +62,9 @@
   </main>
 
   <footer class="site-footer">
-    <a class="footer-name" href="#accueil">Camille Sardet<span class="identity-dot" aria-hidden="true"></span></a>
-    <span>Designer &amp; plasticienne · Paris</span>
+    <a class="footer-name" href="#accueil">Camille Sardet</a>
+    <span>Studio de design · Paris</span>
     <a href="mailto:sardet.camille@gmail.com">Écrire un mot <span aria-hidden="true">↗</span></a>
-    <a class="footer-admin" href="admin.html">Administration</a>
     <span class="footer-year">© <span id="year"></span></span>
   </footer>
 

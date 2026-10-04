@@ -523,40 +523,35 @@
         "nm-a5",
         "nm-serie2",
         "nm-serie3",
-        "nm-serie1"
+        "nm-serie1",
+        "8-25",
+        "8-32",
+        "pdf-cpd-02",
+        "pdf-cpd-04"
       ],
-      "description": "Une série de natures mortes quotidiennes, réunissant des scènes de fruits, de fleurs et d’objets dessinées ou peintes entre 2023 et 2025.",
-      "descriptionEn": "A series of everyday still lifes, bringing together scenes of fruit, flowers and objects drawn or painted between 2023 and 2025."
+      "description": "Une série de natures mortes quotidiennes au crayon de couleur sur papier, réunissant des scènes de fruits, de fleurs, de tables et d’objets dessinées entre 2023 et 2025.",
+      "descriptionEn": "A series of everyday still lifes in coloured pencil on paper, bringing together scenes of fruit, flowers, tables and objects drawn between 2023 and 2025."
     },
     {
       "id": "ete",
       "title": "Récit d’un été",
       "year": "2025",
       "type": "Série",
-      "cover": "8-25",
+      "cover": "8-22",
       "images": [
-        "8-22",
-        "ete-02",
-        "ete-03",
-        "ete-06",
-        "ete-07",
-        "ete-08",
-        "ete-09",
         "8-30",
-        "ete-11",
-        "8-32",
-        "ete-13",
-        "ete-14",
         "ete-15",
         "ete-16",
         "ete-26",
+        "ete-02",
+        "ete-03",
+        "ete-08",
+        "ete-11",
         "ete-27",
-        "ete-28",
-        "8-40",
-        "ete-30"
+        "ete-28"
       ],
-      "description": "Récit d’un été entre ombre et lumière réunit des scènes observées au fil de l’été, entre lieux, objets et moments du quotidien.",
-      "descriptionEn": "A summer story between shadow and light brings together scenes observed over the course of the season, including places, objects and moments from everyday life."
+      "description": "Récit d’un été entre ombre et lumière est une série de dessins au feutre sur papier, 14,8 × 21 cm. Elle réunit des scènes observées au fil de l’été, entre lieux, objets et moments du quotidien.",
+      "descriptionEn": "A summer story between shadow and light is a series of felt-tip pen drawings on paper, 14.8 × 21 cm. It brings together scenes observed over the course of the season, including places, objects and moments from everyday life."
     },
     {
       "id": "savoie",
@@ -566,13 +561,12 @@
       "cover": "9-0",
       "images": [
         "savoie-02",
-        "savoie-03",
         "9-3",
         "savoie-05",
         "savoie-06"
       ],
-      "description": "Une série de paysages de Savoie, réunis dans ce carnet de 2026.",
-      "descriptionEn": "A series of landscapes from Savoie, brought together in this 2026 sketchbook."
+      "description": "Une série de paysages de Savoie peints à l’huile sur papier en 2026, dont Malabar Princesse, Mont Corbier et L’heure bleue.",
+      "descriptionEn": "A series of Savoie landscapes painted in oil on paper in 2026, including Malabar Princesse, Mont Corbier and L’heure bleue."
     },
     {
       "id": "kokeshi",
@@ -737,16 +731,14 @@
       "type": "Série",
       "cover": "pdf-cpd-01",
       "images": [
-        "pdf-cpd-02",
-        "pdf-cpd-03",
-        "pdf-cpd-04",
-        "pdf-cpd-06",
-        "pdf-cpd-12",
-        "pdf-cpd-13",
-        "pdf-cpd-14",
-        "pdf-cpd-15",
-        "pdf-cpd-16",
-        "pdf-cpd-17"
+        "ete-14",
+        "ete-06",
+        "ete-07",
+        "ete-09",
+        "ete-13",
+        "8-40",
+        "ete-30",
+        "pdf-cpd-16"
       ],
       "description": "« Collection de peintures et de dessins » rassemble une sélection d’œuvres réalisées entre 2021 et aujourd’hui. Elle témoigne d’une recherche autour de la mémoire des espaces habités et des instants capturés.\n\nLe geste transmet la vibration de la lumière et les couleurs font vibrer les scènes passées. Les images racontent des lieux autrement, à partir de souvenirs et d’émotions.",
       "descriptionEn": "“Collection de peintures et de dessins” brings together a selection of works made from 2021 to the present. It reflects research into the memory of inhabited spaces and captured moments.\n\nThe gesture conveys the vibration of light, while color animates scenes from the past. The images tell stories of places in another way, through memories and emotions."

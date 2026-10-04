@@ -336,3 +336,14 @@ if (location.protocol.startsWith('http')) {
     })
     .catch(() => {});
 }
+
+// Small screens: hide the header while scrolling down, reveal it on scroll up.
+const siteHeader = $('.site-header');
+const smallScreen = matchMedia('(max-width: 800px)');
+let lastScrollY = scrollY;
+addEventListener('scroll', () => {
+  const y = scrollY;
+  const hide = smallScreen.matches && y > lastScrollY && y > siteHeader.offsetHeight && !nav.classList.contains('is-open') && !document.documentElement.classList.contains('entrance-ready');
+  if (Math.abs(y - lastScrollY) > 4 || !hide) siteHeader.classList.toggle('is-hidden', hide);
+  lastScrollY = y;
+}, { passive: true });
