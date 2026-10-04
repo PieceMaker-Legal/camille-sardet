@@ -4,6 +4,7 @@ const dialog = $('#project-dialog');
 let projectData = [];
 let imageData = {};
 let returnFocus = null;
+let portfolioInitialized = false;
 
 function imagePath(key, variant = 'image') {
   const image = imageData[key];
@@ -72,6 +73,7 @@ function renderJournal(items) {
   items.forEach((item, index) => {
     const article = document.createElement('figure');
     article.className = 'journal-item';
+    article.dataset.journalId = item.id;
     const wrap = document.createElement('div');
     wrap.className = 'journal-image-wrap';
     const manifest = imageData[item.cover];
@@ -240,6 +242,9 @@ dialog.addEventListener('close', () => {
   document.body.classList.remove('dialog-open');
   returnFocus?.focus();
   returnFocus = null;
+  if (/^#(?:projet|carnet)-/.test(location.hash)) {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
 });
 dialog.addEventListener('cancel', () => document.body.classList.remove('dialog-open'));
 dialog.addEventListener('keydown', event => {
@@ -278,12 +283,27 @@ document.addEventListener('keydown', event => {
 });
 
 $('#year').textContent = new Date().getFullYear();
+function openGalleryFromHash() {
+  if (!portfolioInitialized || dialog.open) return;
+  const hash = location.hash;
+  const isProject = hash.startsWith('#projet-');
+  const isJournal = hash.startsWith('#carnet-');
+  if (!isProject && !isJournal) return;
+  const id = hash.slice(8);
+  const cards = isProject ? $$('.project-card') : $$('.journal-item');
+  const card = cards.find(element => (isProject ? element.dataset.projectId : element.dataset.journalId) === id);
+  card?.querySelector('button')?.click();
+}
+window.addEventListener('hashchange', openGalleryFromHash);
 function initializePortfolio(content, manifest) {
   projectData = content.projects;
   imageData = manifest;
   renderProjects();
   renderJournal(content.journal);
   if ($('#about-image-wrap') && content.about) renderAbout(content.about);
+  const firstInitialization = !portfolioInitialized;
+  portfolioInitialized = true;
+  if (firstInitialization) openGalleryFromHash();
 }
 if (window.PORTFOLIO_CONTENT && window.PORTFOLIO_IMAGES) {
   initializePortfolio(window.PORTFOLIO_CONTENT, window.PORTFOLIO_IMAGES);
