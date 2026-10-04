@@ -1,0 +1,17 @@
+.studio-main { display:grid; grid-template-columns:minmax(250px,.78fr) minmax(0,1.2fr); gap:clamp(36px,7vw,100px); max-width:1180px; margin:0 auto; padding:70px 28px 100px; align-items:start; }
+.studio-portrait { margin:0; }
+.studio-portrait img { display:block; width:100%; height:auto; max-height:680px; object-fit:cover; }
+.studio-portrait figcaption { margin-top:8px; color:var(--muted); font-size:11px; }
+.studio-copy h2 { margin:0 0 23px; font-size:clamp(36px,4.5vw,58px); line-height:1; letter-spacing:-.055em; }
+.studio-kicker { margin:0 0 12px; color:var(--muted); font-size:12px; }
+.studio-language { display:grid; gap:12px; }
+.studio-language p { margin:0; font-size:16px; line-height:1.7; }
+.studio-language + .studio-language { margin-top:27px; padding-top:24px; border-top:1px solid var(--line); }
+.studio-signature { margin:28px 0 22px; font-size:18px; font-style:italic; line-height:1.5; }
+.studio-links,.studio-documents { display:flex; flex-wrap:wrap; gap:10px 24px; font-size:13px; }
+.studio-links a:hover,.studio-documents a:hover { color:var(--blue); }
+.studio-links span,.studio-documents span { color:var(--blue); }
+.studio-documents { margin-top:23px; padding-top:19px; border-top:1px solid var(--line); }
+.studio-footer { grid-template-columns:1fr 1.3fr 1fr auto auto; }
+@media(max-width:800px) { .studio-main { grid-template-columns:minmax(190px,.7fr) 1fr; gap:32px; padding:50px 22px 75px; } }
+@media(max-width:620px) { .studio-main { grid-template-columns:1fr; gap:28px; padding:34px 19px 55px; } .studio-portrait { width:min(82%,390px); } .studio-language p { font-size:15px; } .studio-footer { grid-template-columns:1fr 1fr; } }
