@@ -18,3 +18,13 @@ document.addEventListener('keydown', event => {
 });
 const year = document.querySelector('#year');
 if (year) year.textContent = new Date().getFullYear();
+
+function openStudioSection(hash = location.hash) {
+  const section = document.getElementById(hash.slice(1));
+  if (section?.matches('details.studio-section')) section.open = true;
+}
+document.querySelectorAll('.studio-index a').forEach(link => {
+  link.addEventListener('click', () => openStudioSection(link.hash));
+});
+window.addEventListener('hashchange', () => openStudioSection());
+openStudioSection();

@@ -7,8 +7,8 @@
   <meta name="description" content="Studio de Camille Sardet, designer et plasticienne à Paris : projets, collaborations, expositions, prix, œuvres et parcours.">
   <title>Studio — Camille Sardet</title>
   <link rel="stylesheet" href="styles.css?v=20">
-  <link rel="stylesheet" href="studio.css?v=2">
-  <script src="studio.js?v=2" defer></script>
+  <link rel="stylesheet" href="studio.css?v=3">
+  <script src="studio.js?v=3" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#studio">Aller au contenu</a>
@@ -71,11 +71,13 @@
         <a href="#transmission">Enseignement &amp; conférences</a>
         <a href="#parcours">Résidences &amp; formation</a>
       </nav>
-      <section class="studio-section" id="distinctions" aria-labelledby="distinctions-title">
-        <header class="studio-section-heading">
+      <details class="studio-section" id="distinctions">
+        <summary class="studio-section-heading">
           <span class="studio-section-number" aria-hidden="true">01</span>
           <h2 id="distinctions-title">Prix &amp; distinctions</h2>
-        </header>
+          <span class="studio-section-toggle" aria-hidden="true"></span>
+        </summary>
+        <div class="studio-section-content">
         <div class="studio-group">
           <ul class="studio-entries">
             <li class="studio-entry">
@@ -115,12 +117,15 @@
             </li>
           </ul>
         </div>
-      </section>
-      <section class="studio-section" id="expositions" aria-labelledby="expositions-title">
-        <header class="studio-section-heading">
+        </div>
+      </details>
+      <details class="studio-section" id="expositions">
+        <summary class="studio-section-heading">
           <span class="studio-section-number" aria-hidden="true">02</span>
           <h2 id="expositions-title">Expositions &amp; présentations</h2>
-        </header>
+          <span class="studio-section-toggle" aria-hidden="true"></span>
+        </summary>
+        <div class="studio-section-content">
         <div class="studio-group">
           <ul class="studio-entries">
             <li class="studio-entry">
@@ -188,12 +193,15 @@
             </li>
           </ul>
         </div>
-      </section>
-      <section class="studio-section" id="collaborations" aria-labelledby="collaborations-title">
-        <header class="studio-section-heading">
+        </div>
+      </details>
+      <details class="studio-section" id="collaborations">
+        <summary class="studio-section-heading">
           <span class="studio-section-number" aria-hidden="true">03</span>
           <h2 id="collaborations-title">Projets &amp; collaborations</h2>
-        </header>
+          <span class="studio-section-toggle" aria-hidden="true"></span>
+        </summary>
+        <div class="studio-section-content">
         <p class="studio-section-intro">Images, objets, systèmes et espaces : une pratique qui relie recherche, savoir-faire et usages.</p>
         <div class="studio-group">
           <h3 class="studio-group-title">Studio Camille Sardet &amp; recherches</h3>
@@ -413,12 +421,15 @@
             </li>
           </ul>
         </div>
-      </section>
-      <section class="studio-section" id="oeuvres" aria-labelledby="oeuvres-title">
-        <header class="studio-section-heading">
+        </div>
+      </details>
+      <details class="studio-section" id="oeuvres">
+        <summary class="studio-section-heading">
           <span class="studio-section-number" aria-hidden="true">04</span>
           <h2 id="oeuvres-title">Peintures, dessins &amp; photographies</h2>
-        </header>
+          <span class="studio-section-toggle" aria-hidden="true"></span>
+        </summary>
+        <div class="studio-section-content">
         <p class="studio-section-intro">Œuvres et séries citées dans les portfolios. Les recherches se poursuivent dans les Carnets.</p>
         <div class="studio-group">
           <h3 class="studio-group-title">Œuvres &amp; séries</h3>
@@ -593,12 +604,15 @@
             </li>
           </ul>
         </div>
-      </section>
-      <section class="studio-section" id="transmission" aria-labelledby="transmission-title">
-        <header class="studio-section-heading">
+        </div>
+      </details>
+      <details class="studio-section" id="transmission">
+        <summary class="studio-section-heading">
           <span class="studio-section-number" aria-hidden="true">05</span>
           <h2 id="transmission-title">Enseignement &amp; conférences</h2>
-        </header>
+          <span class="studio-section-toggle" aria-hidden="true"></span>
+        </summary>
+        <div class="studio-section-content">
         <div class="studio-group">
           <h3 class="studio-group-title">Enseignement</h3>
           <ul class="studio-entries">
@@ -651,12 +665,15 @@
             </li>
           </ul>
         </div>
-      </section>
-      <section class="studio-section" id="parcours" aria-labelledby="parcours-title">
-        <header class="studio-section-heading">
+        </div>
+      </details>
+      <details class="studio-section" id="parcours">
+        <summary class="studio-section-heading">
           <span class="studio-section-number" aria-hidden="true">06</span>
           <h2 id="parcours-title">Résidences &amp; formation</h2>
-        </header>
+          <span class="studio-section-toggle" aria-hidden="true"></span>
+        </summary>
+        <div class="studio-section-content">
         <div class="studio-group">
           <h3 class="studio-group-title">Résidences</h3>
           <ul class="studio-entries">
@@ -723,7 +740,8 @@
             </li>
           </ul>
         </div>
-      </section>
+        </div>
+      </details>
       <div class="studio-catalogue-end">
         <a href="#studio">Retour en haut <span aria-hidden="true">↑</span></a>
         <a href="assets/documents/portfolio-2026.pdf" target="_blank" rel="noreferrer">Télécharger le portfolio <span aria-hidden="true">↓</span></a>

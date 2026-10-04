@@ -19,6 +19,9 @@ h4 { margin:0 0 10px; font-size:13px; }
 .auth-panel { width:min(420px,100%); margin:9vh auto 0; padding:38px; background:#fff; border:1px solid var(--line); }
 .auth-intro,.auth-note { margin:0 0 23px; color:var(--muted); line-height:1.55; }
 .auth-form { display:grid; gap:12px; }
+.auth-check { display:flex; align-items:center; gap:8px; font-weight:500; }
+.auth-check input { width:auto; margin:0; }
+.auth-note code { font-size:12px; }
 label { display:block; font-size:13px; font-weight:600; }
 input,textarea { display:block; width:100%; margin-top:7px; padding:11px 12px; border:1px solid #d8d5ce; border-radius:0; background:white; color:var(--ink); }
 textarea { resize:vertical; line-height:1.5; }

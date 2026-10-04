@@ -323,14 +323,16 @@ if (window.PORTFOLIO_CONTENT && window.PORTFOLIO_IMAGES) {
   });
 }
 
-// Hosted pages refresh the bundle from the remote API. The file:// version
-// remains self-contained and uses the embedded data above.
-const PORTFOLIO_API = 'https://camille-sardet-admin.rosy-gleam-9132.chatgpt.site/api/content';
-if (location.hostname === 'piecemaker-legal.github.io') {
-  fetch(PORTFOLIO_API, { cache: 'no-store' })
-    .then(response => response.ok ? response.json() : null)
-    .then(payload => {
-      if (payload?.content && payload?.manifest) initializePortfolio(payload.content, payload.manifest);
+// Online edits are committed to the repository: hosted pages re-read the data
+// files, bypassing a bundle the browser may still have cached. The file://
+// version remains self-contained and uses the embedded data above.
+if (location.protocol.startsWith('http')) {
+  Promise.all(['data/projects.json', 'data/image-manifest.json'].map(path =>
+    fetch(path, { cache: 'no-store' }).then(response => response.ok ? response.json() : null)))
+    .then(([content, manifest]) => {
+      if (!content || !manifest) return;
+      if (JSON.stringify(content) === JSON.stringify(window.PORTFOLIO_CONTENT)) return;
+      initializePortfolio(content, manifest);
     })
     .catch(() => {});
 }

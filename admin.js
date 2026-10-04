@@ -1,49 +1,64 @@
 (() => {
   'use strict';
 
-  const API = 'https://camille-sardet-admin.rosy-gleam-9132.chatgpt.site/api';
+  // Content lives in the GitHub Pages repository: each save is a commit,
+  // and Pages republishes the site on its own.
+  const REPO = 'PieceMaker-Legal/camille-sardet';
+  const BRANCH = 'main';
+  const GITHUB = `https://api.github.com/repos/${REPO}`;
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-  const setupToken = new URLSearchParams(location.hash.slice(1)).get('setup') || '';
-  if (location.hash) history.replaceState(null, '', `${location.pathname}${location.search}`);
 
   const authPanel = $('#auth-panel');
   const workspace = $('#workspace');
   const loginForm = $('#login-form');
-  const setupForm = $('#setup-form');
   const authMessage = $('#auth-message');
-  const setupUnavailable = $('#setup-unavailable');
   const entryForm = $('#entry-form');
   const fields = $('#editor-fields');
-  const tokenKey = 'camille-admin-session';
-  let accessToken = sessionStorage.getItem(tokenKey) || '';
+  const tokenKey = 'camille-admin-github-token';
+  const storedToken = () => { try { return localStorage.getItem(tokenKey) || sessionStorage.getItem(tokenKey) || ''; } catch { return ''; } };
+  let accessToken = storedToken();
   let data = null;
-  let revision = '';
   let active = null;
   let cover = '';
   let images = [];
   let dirty = false;
   let suppressDirty = false;
+  // Images added in this session: committed with the entry that uses them.
+  // Previews stay local until Pages has republished the files.
+  const pendingUploads = new Map();
+  const previews = new Map();
 
-  async function api(path, options = {}) {
-    const headers = new Headers(options.headers || {});
-    if (options.auth !== false && accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
+  async function github(path, options = {}) {
+    const headers = new Headers({ Accept: options.raw ? 'application/vnd.github.raw+json' : 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' });
+    if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
     if (options.json !== undefined) headers.set('Content-Type', 'application/json');
-    if (options.setupToken) headers.set('X-Setup-Token', options.setupToken);
-    const response = await fetch(`${API}${path}`, {
+    const response = await fetch(`${GITHUB}${path}`, {
       method: options.method || 'GET',
       headers,
-      body: options.json !== undefined ? JSON.stringify(options.json) : options.body,
+      body: options.json !== undefined ? JSON.stringify(options.json) : undefined,
       cache: 'no-store',
     });
-    const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      if (response.status === 401 && options.auth !== false) logoutLocal();
-      const error = new Error(payload.error || 'La demande n’a pas abouti.');
+      const payload = await response.json().catch(() => ({}));
+      let message = payload.message || 'La demande n’a pas abouti.';
+      if (response.status === 401) message = 'Jeton GitHub refusé ou expiré.';
+      else if (response.status === 403 || response.status === 404) message = 'Ce jeton n’a pas accès au dépôt du site (permission « Contents » en lecture et écriture requise).';
+      if (response.status === 401) logoutLocal();
+      const error = new Error(message);
       error.status = response.status;
       throw error;
     }
-    return payload;
+    return options.raw ? response.text() : response.json();
+  }
+
+  async function readJson(path, ref) {
+    return JSON.parse(await github(`/contents/${path}?ref=${ref}`, { raw: true }));
+  }
+
+  async function headCommit() {
+    const ref = await github(`/git/ref/heads/${BRANCH}`);
+    return ref.object.sha;
   }
 
   function showMessage(node, message, success = false) {
@@ -55,22 +70,24 @@
     authPanel.hidden = view === 'workspace';
     workspace.hidden = view !== 'workspace';
     loginForm.hidden = view !== 'login';
-    setupForm.hidden = view !== 'setup';
-    setupUnavailable.hidden = view !== 'unavailable';
+  }
+
+  function forgetToken() {
+    try { localStorage.removeItem(tokenKey); sessionStorage.removeItem(tokenKey); } catch {}
   }
 
   function logoutLocal() {
     accessToken = '';
-    sessionStorage.removeItem(tokenKey);
+    forgetToken();
     data = null;
     setAuthView('login');
   }
 
   async function loadAdmin() {
-    const payload = await api('/admin/content');
-    data = payload.content;
-    revision = payload.revision;
-    data.manifest = payload.manifest;
+    const sha = await headCommit();
+    const [content, manifest] = await Promise.all([readJson('data/projects.json', sha), readJson('data/image-manifest.json', sha)]);
+    data = content;
+    data.manifest = manifest;
     active = null;
     renderList();
     renderLibrary();
@@ -79,51 +96,30 @@
   }
 
   async function initialize() {
-    try {
-      const state = await api('/status', { auth: false });
-      if (!state.configured) {
-        setAuthView(setupToken ? 'setup' : 'unavailable');
-        return;
-      }
-      if (accessToken) {
-        try { await loadAdmin(); return; } catch { logoutLocal(); }
-      }
-      setAuthView('login');
-    } catch (error) {
-      setAuthView('unavailable');
-      showMessage(authMessage, `Connexion au service impossible. ${error.message}`);
+    if (accessToken) {
+      try { await loadAdmin(); return; }
+      catch (error) { if (error.status !== 401) showMessage(authMessage, error.message); }
     }
+    setAuthView('login');
   }
 
   loginForm.addEventListener('submit', async event => {
     event.preventDefault();
     showMessage(authMessage, '');
-    const password = new FormData(loginForm).get('password');
+    const form = new FormData(loginForm);
     const button = $('button[type="submit"]', loginForm);
     button.disabled = true;
+    accessToken = String(form.get('token') || '').trim();
     try {
-      const result = await api('/login', { method: 'POST', auth: false, json: { password } });
-      accessToken = result.token;
-      sessionStorage.setItem(tokenKey, accessToken);
-      loginForm.reset();
       await loadAdmin();
-    } catch (error) { showMessage(authMessage, error.message); }
-    finally { button.disabled = false; }
-  });
-
-  setupForm.addEventListener('submit', async event => {
-    event.preventDefault();
-    showMessage(authMessage, '');
-    const form = new FormData(setupForm);
-    const button = $('button[type="submit"]', setupForm);
-    button.disabled = true;
-    try {
-      await api('/setup', { method: 'POST', auth: false, setupToken, json: { password: form.get('password'), confirm: form.get('confirm') } });
-      setupForm.reset();
-      showMessage(authMessage, 'Mot de passe créé. Vous pouvez vous connecter.', true);
+      forgetToken();
+      try { (form.get('remember') ? localStorage : sessionStorage).setItem(tokenKey, accessToken); } catch {}
+      loginForm.reset();
+    } catch (error) {
+      accessToken = '';
       setAuthView('login');
-      $('#login-password').focus();
-    } catch (error) { showMessage(authMessage, error.message); }
+      showMessage(authMessage, error.message);
+    }
     finally { button.disabled = false; }
   });
 
@@ -223,6 +219,8 @@
   $('#new-journal').addEventListener('click', () => newEntry('journal'));
 
   function imageUrl(key, variant = 'thumbnail') {
+    const preview = previews.get(key);
+    if (preview) return variant === 'image' ? preview.image : preview.thumbnail;
     const record = data?.manifest?.[key];
     if (!record) return '';
     return variant === 'image' ? record.image : record.thumbnail;
@@ -304,8 +302,8 @@
   }
   $('#media-search').addEventListener('input', renderLibrary);
 
-  function blobFromCanvas(canvas) {
-    return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Impossible de préparer cette image.')),'image/webp',.83));
+  function blobFromCanvas(canvas, type) {
+    return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Impossible de préparer cette image.')),type,.83));
   }
 
   async function prepareImage(file) {
@@ -317,9 +315,13 @@
       const encode = async bound => {
         const scale=Math.min(1,bound/Math.max(bitmap.width,bitmap.height));
         const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
-        const ctx=canvas.getContext('2d');ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);return blobFromCanvas(canvas);
+        const ctx=canvas.getContext('2d');ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+        // Browsers without a WebP encoder silently return PNG: use JPEG instead.
+        let blob=await blobFromCanvas(canvas,'image/webp');
+        if (blob.type!=='image/webp') blob=await blobFromCanvas(canvas,'image/jpeg');
+        return { blob, width:canvas.width, height:canvas.height };
       };
-      return { original:file, full:await encode(1600), thumb:await encode(800) };
+      return { full:await encode(1600), thumb:await encode(800) };
     } finally { bitmap.close(); }
   }
 
@@ -330,17 +332,72 @@
     try {
       for (const file of files) {
         const prepared=await prepareImage(file);
-        const form=new FormData();form.append('revision',revision);form.append('original',prepared.original,file.name);form.append('full',prepared.full,`${file.name}.webp`);form.append('thumb',prepared.thumb,`${file.name}-thumb.webp`);
-        const result=await api('/admin/upload',{method:'POST',body:form});
-        revision=result.revision;
-        data.manifest[result.id]=result.manifest;
-        if (!cover) cover=result.id; else images.push(result.id);
+        const id=`u-${Date.now().toString(36)}-${crypto.randomUUID().slice(0,6)}`;
+        const ext=prepared.full.blob.type==='image/webp'?'webp':'jpg';
+        const record={uploaded:true,image:`assets/uploads/${id}.${ext}`,thumbnail:`assets/uploads/${id}-thumb.${ext}`,width:prepared.full.width,height:prepared.full.height,thumbnailWidth:prepared.thumb.width,thumbnailHeight:prepared.thumb.height};
+        pendingUploads.set(id,{record,files:[[record.image,prepared.full.blob],[record.thumbnail,prepared.thumb.blob]]});
+        previews.set(id,{image:URL.createObjectURL(prepared.full.blob),thumbnail:URL.createObjectURL(prepared.thumb.blob)});
+        data.manifest[id]=record;
+        if (!cover) cover=id; else images.push(id);
         markDirty(); renderSelected(); renderLibrary();
       }
-      showMessage($('#save-message'),'Images ajoutées à la sélection.',true);
+      showMessage($('#save-message'),'Images ajoutées à la sélection. Elles seront publiées à l’enregistrement.',true);
     } catch(error) { showMessage($('#save-message'),error.message); }
     finally { input.disabled=false; }
   });
+
+  async function blobToBase64(blob) {
+    const bytes=new Uint8Array(await blob.arrayBuffer());
+    let binary='';
+    for (let i=0;i<bytes.length;i+=0x8000) binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));
+    return btoa(binary);
+  }
+
+  function contentBundle(content, manifest) {
+    return `window.PORTFOLIO_CONTENT = ${JSON.stringify(content)};\nwindow.PORTFOLIO_IMAGES = ${JSON.stringify(manifest)};\n`;
+  }
+
+  // Applies the change on top of the latest commit, so edits made elsewhere
+  // in the meantime are kept; retries if the branch moved during the save.
+  async function commitEntry(kind, item, isNew) {
+    const uploads=[item.cover,...item.images].filter(key=>pendingUploads.has(key));
+    for (const key of uploads) {
+      const upload=pendingUploads.get(key);
+      for (const file of upload.files) {
+        if (file[2]) continue;
+        const blob=await github('/git/blobs',{method:'POST',json:{content:await blobToBase64(file[1]),encoding:'base64'}});
+        file[2]=blob.sha;
+      }
+    }
+    for (let attempt=0;;attempt++) {
+      const parent=await headCommit();
+      const [commit,content,manifest]=await Promise.all([github(`/git/commits/${parent}`),readJson('data/projects.json',parent),readJson('data/image-manifest.json',parent)]);
+      const list=kind==='project'?content.projects:content.journal;
+      const index=list.findIndex(entry=>entry.id===item.id);
+      if (index<0) list.push(item); else list[index]=item;
+      for (const key of [item.cover,...item.images]) {
+        if (pendingUploads.has(key)) manifest[key]=pendingUploads.get(key).record;
+        else if (!manifest[key]) throw new Error(`Image introuvable dans le dépôt : ${key}`);
+      }
+      const tree=[
+        {path:'data/projects.json',mode:'100644',type:'blob',content:JSON.stringify(content,null,2)+'\n'},
+        {path:'data/image-manifest.json',mode:'100644',type:'blob',content:JSON.stringify(manifest)+'\n'},
+        {path:'data/content.js',mode:'100644',type:'blob',content:contentBundle(content,manifest)},
+        ...uploads.flatMap(key=>pendingUploads.get(key).files.map(([path,,sha])=>({path,mode:'100644',type:'blob',sha}))),
+      ];
+      const newTree=await github('/git/trees',{method:'POST',json:{base_tree:commit.tree.sha,tree}});
+      const label=kind==='project'?'projet':'carnet';
+      const newCommit=await github('/git/commits',{method:'POST',json:{message:`${isNew?'Ajout':'Mise à jour'} du ${label} « ${item.title} » depuis l’administration`,tree:newTree.sha,parents:[parent]}});
+      try {
+        await github(`/git/refs/heads/${BRANCH}`,{method:'PATCH',json:{sha:newCommit.sha}});
+      } catch(error) {
+        if (error.status===422 && attempt<3) continue;
+        throw error;
+      }
+      uploads.forEach(key=>pendingUploads.delete(key));
+      return {content,manifest};
+    }
+  }
 
   entryForm.addEventListener('submit', async event => {
     event.preventDefault();
@@ -348,37 +405,29 @@
     if (!cover) { showMessage($('#save-message'),'Choisis une image de couverture.'); return; }
     const form=new FormData(entryForm);
     const title=String(form.get('title')||'').trim();
-    const generatedId=title.toLocaleLowerCase('fr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,64)||'contenu';
+    const generatedId=title.toLocaleLowerCase('fr').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,64)||'contenu';
     const id=active.isNew?`${generatedId}-${crypto.randomUUID().slice(0,8)}`:active.id;
-    const item={id,title,year:String(form.get('year')||''),cover,images:[...images],description:String(form.get('description')||''),descriptionEn:String(form.get('descriptionEn')||''),credits:textToCredits(String(form.get('credits')||''))};
+    const original=active.isNew?{}:(active.kind==='project'?data.projects:data.journal).find(entry=>entry.id===id)||{};
+    const item={...original,id,title,year:String(form.get('year')||''),cover,images:[...images],description:String(form.get('description')||''),descriptionEn:String(form.get('descriptionEn')||''),credits:textToCredits(String(form.get('credits')||''))};
     if(active.kind==='project'){item.category=String(form.get('category')||'');item.type=String(form.get('type')||'');}
     else item.type=String(form.get('journalType')||'');
     const saveButton=$('#save-entry');saveButton.disabled=true;showMessage($('#save-message'),'Enregistrement…');
     try {
-      const result=await api('/admin/save',{method:'POST',json:{kind:active.kind,isNew:active.isNew,item,revision}});
-      revision=result.revision;
-      const list=active.kind==='project'?data.projects:data.journal;
-      const index=list.findIndex(entry=>entry.id===result.item.id);
-      if(index<0)list.push(result.item);else list[index]=result.item;
-      setActive(active.kind,result.item,false);
-      showMessage($('#save-message'),'Modifications enregistrées.',true);
+      const result=await commitEntry(active.kind,item,active.isNew);
+      const pendingRecords=Object.fromEntries([...pendingUploads].map(([key,upload])=>[key,upload.record]));
+      data={...result.content,manifest:{...result.manifest,...pendingRecords}};
+      const saved=(active.kind==='project'?data.projects:data.journal).find(entry=>entry.id===id);
+      setActive(active.kind,saved,false);
+      renderLibrary();
+      showMessage($('#save-message'),'Enregistré. Le site sera à jour d’ici une à deux minutes.',true);
     } catch(error){showMessage($('#save-message'),error.message);}
     finally{saveButton.disabled=false;}
   });
 
-  $('#logout').addEventListener('click', async () => {
-    try { await api('/admin/logout',{method:'POST',json:{}}); } catch {}
+  $('#logout').addEventListener('click', () => {
+    if (dirty && !confirm('Abandonner les modifications non enregistrées ?')) return;
+    dirty=false;
     logoutLocal();
-  });
-
-  const passwordDialog=$('#password-dialog');
-  $('#change-password').addEventListener('click',()=>passwordDialog.showModal());
-  $('#close-password').addEventListener('click',()=>passwordDialog.close());
-  $('#password-form').addEventListener('submit',async event=>{
-    event.preventDefault();const form=event.currentTarget;const values=Object.fromEntries(new FormData(form));
-    showMessage($('#password-message'),'');
-    try{await api('/admin/change-password',{method:'POST',json:values});form.reset();passwordDialog.close();alert('Mot de passe mis à jour.');}
-    catch(error){showMessage($('#password-message'),error.message);}
   });
 
   window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
